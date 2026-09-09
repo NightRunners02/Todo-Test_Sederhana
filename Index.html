@@ -1,0 +1,631 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <base target="_top">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Dashboard Task Manager</title>
+  <!-- Google Font -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <!-- Lucide Icons -->
+  <script src="https://unpkg.com/lucide@latest"></script>
+  
+  <style>
+    /* Variabel Warna Light Mode (Default) */
+    :root {
+      --primary: #4F46E5;
+      --primary-hover: #4338CA;
+      --bg-body: #F8FAFC;
+      --surface: #FFFFFF;
+      --text-main: #0F172A;
+      --text-muted: #64748B;
+      --border: #E2E8F0;
+      --input-bg: #F8FAFC;
+      --task-hover: #CBD5E1;
+      --success: #10B981;
+      --danger: #EF4444;
+      --radius: 12px;
+      --shadow: 0 10px 25px -5px rgba(15, 23, 42, 0.05), 0 8px 10px -6px rgba(15, 23, 42, 0.05);
+    }
+
+    /* Variabel Warna Dark Mode */
+    [data-theme="dark"] {
+      --primary: #6366F1;
+      --primary-hover: #4F46E5;
+      --bg-body: #0F172A;
+      --surface: #1E293B;
+      --text-main: #F8FAFC;
+      --text-muted: #94A3B8;
+      --border: #334155;
+      --input-bg: #0F172A;
+      --task-hover: #475569;
+      --shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.3);
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: 'Plus Jakarta Sans', sans-serif;
+      transition: background-color 0.25s ease, color 0.25s ease, border-color 0.25s ease;
+    }
+
+    body {
+      background-color: var(--bg-body);
+      color: var(--text-main);
+      display: flex;
+      justify-content: center;
+      padding: 30px 15px;
+      min-height: 100vh;
+    }
+
+    .dashboard-container {
+      width: 100%;
+      max-width: 720px;
+    }
+
+    /* Header & Title */
+    .app-header {
+      margin-bottom: 24px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .app-title {
+      font-size: 24px;
+      font-weight: 700;
+      color: var(--text-main);
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .app-subtitle {
+      font-size: 14px;
+      color: var(--text-muted);
+      margin-top: 4px;
+    }
+
+    /* User Info Badge */
+    .user-profile-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      background: rgba(79, 70, 229, 0.1);
+      color: var(--primary);
+      padding: 4px 10px;
+      border-radius: 20px;
+      font-size: 12px;
+      font-weight: 600;
+      margin-top: 6px;
+    }
+
+    .header-controls {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    /* Dark Mode Toggle Button */
+    .theme-toggle-btn {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      color: var(--text-main);
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+      flex-shrink: 0;
+    }
+
+    .theme-toggle-btn:hover {
+      border-color: var(--primary);
+      color: var(--primary);
+    }
+
+    /* Stats Dashboard */
+    .stats-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 12px;
+      margin-bottom: 24px;
+    }
+
+    .stat-card {
+      background: var(--surface);
+      padding: 16px;
+      border-radius: var(--radius);
+      border: 1px solid var(--border);
+      box-shadow: 0 1px 3px rgba(0,0,0,0.02);
+    }
+
+    .stat-label {
+      font-size: 12px;
+      font-weight: 600;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    .stat-value {
+      font-size: 22px;
+      font-weight: 700;
+      margin-top: 6px;
+      color: var(--text-main);
+    }
+
+    /* Main Card Container */
+    .main-card {
+      background: var(--surface);
+      border-radius: var(--radius);
+      border: 1px solid var(--border);
+      box-shadow: var(--shadow);
+      padding: 24px;
+    }
+
+    /* Form Input */
+    .input-wrapper {
+      display: flex;
+      gap: 10px;
+      margin-bottom: 20px;
+    }
+
+    .task-input {
+      flex: 1;
+      padding: 12px 16px;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      font-size: 14px;
+      outline: none;
+      background: var(--input-bg);
+      color: var(--text-main);
+    }
+
+    .task-input:focus {
+      border-color: var(--primary);
+      box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.15);
+    }
+
+    .btn-submit {
+      padding: 12px 20px;
+      background-color: var(--primary);
+      color: white;
+      border: none;
+      border-radius: 8px;
+      font-size: 14px;
+      font-weight: 600;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .btn-submit:hover {
+      background-color: var(--primary-hover);
+    }
+
+    /* Filter Tabs */
+    .filter-tabs {
+      display: flex;
+      gap: 8px;
+      border-bottom: 1px solid var(--border);
+      padding-bottom: 12px;
+      margin-bottom: 16px;
+    }
+
+    .tab-btn {
+      background: none;
+      border: none;
+      padding: 6px 12px;
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--text-muted);
+      border-radius: 6px;
+      cursor: pointer;
+    }
+
+    .tab-btn.active {
+      background: rgba(79, 70, 229, 0.12);
+      color: var(--primary);
+    }
+
+    /* Task List */
+    .task-list {
+      list-style: none;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .task-item {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 12px 16px;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+    }
+
+    .task-item:hover {
+      border-color: var(--task-hover);
+    }
+
+    .task-item.completed {
+      opacity: 0.7;
+    }
+
+    .task-left {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      flex: 1;
+      cursor: pointer;
+      overflow: hidden;
+    }
+
+    .custom-checkbox {
+      width: 20px;
+      height: 20px;
+      border-radius: 6px;
+      border: 2px solid var(--text-muted);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+    }
+
+    .task-item.completed .custom-checkbox {
+      background-color: var(--success);
+      border-color: var(--success);
+      color: white;
+    }
+
+    .task-text {
+      font-size: 14px;
+      color: var(--text-main);
+      word-break: break-word;
+    }
+
+    .task-item.completed .task-text {
+      text-decoration: line-through;
+      color: var(--text-muted);
+    }
+
+    .btn-delete {
+      background: transparent;
+      border: none;
+      color: var(--text-muted);
+      cursor: pointer;
+      padding: 6px;
+      border-radius: 6px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .btn-delete:hover {
+      color: var(--danger);
+      background: rgba(239, 68, 68, 0.1);
+    }
+
+    /* Loading & Empty State */
+    .status-state {
+      text-align: center;
+      padding: 30px 0;
+      color: var(--text-muted);
+      font-size: 14px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 8px;
+    }
+
+    /* Responsive Design */
+    @media (max-width: 576px) {
+      body {
+        padding: 15px 10px;
+      }
+
+      .stats-grid {
+        grid-template-columns: repeat(3, 1fr);
+        gap: 8px;
+      }
+
+      .stat-card {
+        padding: 12px 10px;
+      }
+
+      .stat-label {
+        font-size: 10px;
+      }
+
+      .stat-value {
+        font-size: 18px;
+      }
+
+      .input-wrapper {
+        flex-direction: column;
+      }
+
+      .btn-submit {
+        justify-content: center;
+      }
+
+      .main-card {
+        padding: 16px;
+      }
+    }
+  </style>
+</head>
+<body>
+
+<div class="dashboard-container">
+  
+  <!-- Header dengan Profil Login & Tombol Toggle Mode Malam/Siang -->
+  <header class="app-header">
+    <div>
+      <div class="app-title">
+        <i data-lucide="check-square" style="color: var(--primary);"></i>
+        <span>Task Manager</span>
+      </div>
+      <p class="app-subtitle">Kelola tugas harian Anda secara terorganisir dan efisien.</p>
+      <!-- Badge Akun Login -->
+      <div class="user-profile-badge" id="userBadge">
+        <i data-lucide="user" style="width: 12px; height: 12px;"></i>
+        <span id="userEmailText">Memuat akun...</span>
+      </div>
+    </div>
+    
+    <div class="header-controls">
+      <!-- Tombol Mode Malam / Siang -->
+      <button class="theme-toggle-btn" id="themeToggleBtn" onclick="toggleTheme()" title="Ganti Mode Tampilan">
+        <i data-lucide="sun" id="themeIcon" style="width: 20px; height: 20px;"></i>
+      </button>
+    </div>
+  </header>
+
+  <!-- Statistics Cards -->
+  <div class="stats-grid">
+    <div class="stat-card">
+      <div class="stat-label">Total</div>
+      <div class="stat-value" id="statTotal">0</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-label" style="color: var(--success);">Selesai</div>
+      <div class="stat-value" id="statCompleted">0</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-label" style="color: #F59E0B;">Pending</div>
+      <div class="stat-value" id="statPending">0</div>
+    </div>
+  </div>
+
+  <!-- Main Content Card -->
+  <main class="main-card">
+    
+    <!-- Input Form -->
+    <div class="input-wrapper">
+      <input type="text" id="taskInput" class="task-input" placeholder="Ketik tugas baru di sini..." onkeypress="handleKeyPress(event)">
+      <button class="btn-submit" onclick="addNewTask()">
+        <i data-lucide="plus" style="width: 18px; height: 18px;"></i>
+        <span>Tambah</span>
+      </button>
+    </div>
+
+    <!-- Filter Tabs -->
+    <div class="filter-tabs">
+      <button class="tab-btn active" onclick="setFilter('all', this)">Semua</button>
+      <button class="tab-btn" onclick="setFilter('pending', this)">Pending</button>
+      <button class="tab-btn" onclick="setFilter('completed', this)">Selesai</button>
+    </div>
+
+    <!-- Loading State -->
+    <div id="loading" class="status-state">
+      <i data-lucide="loader" style="width: 24px; height: 24px; color: var(--primary);"></i>
+      <span>Memuat data dari Spreadsheet...</span>
+    </div>
+
+    <!-- Task List -->
+    <ul id="taskList" class="task-list"></ul>
+
+  </main>
+</div>
+
+<script>
+  let rawTasksData = [];
+  let currentFilter = 'all';
+
+  window.onload = function() {
+    initTheme();
+    loadUserProfile();
+    loadTasks();
+  };
+
+  /* --- FUNGSI AUTHENTICATION / PROFIL USER --- */
+  function loadUserProfile() {
+    google.script.run
+      .withSuccessHandler(function(profile) {
+        if (profile && profile.email) {
+          document.getElementById('userEmailText').textContent = profile.email;
+        } else {
+          document.getElementById('userEmailText').textContent = 'Guest User';
+        }
+      })
+      .withFailureHandler(function() {
+        document.getElementById('userEmailText').textContent = 'Pengguna Aktif';
+      })
+      .getUserProfile();
+  }
+
+  /* --- FUNGSI MODE MALAM / SIANG --- */
+  function initTheme() {
+    const savedTheme = localStorage.getItem('theme') || 'light';
+    document.documentElement.setAttribute('data-theme', savedTheme);
+    updateThemeIcon(savedTheme);
+  }
+
+  function toggleTheme() {
+    const currentTheme = document.documentElement.getAttribute('data-theme');
+    const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
+    
+    document.documentElement.setAttribute('data-theme', newTheme);
+    localStorage.setItem('theme', newTheme);
+    updateThemeIcon(newTheme);
+  }
+
+  function updateThemeIcon(theme) {
+    const themeIcon = document.getElementById('themeIcon');
+    if (theme === 'dark') {
+      themeIcon.setAttribute('data-lucide', 'moon');
+    } else {
+      themeIcon.setAttribute('data-lucide', 'sun');
+    }
+    lucide.createIcons();
+  }
+
+  /* --- FUNGSI TUGAS & CRUD --- */
+  function handleKeyPress(e) {
+    if (e.key === 'Enter') {
+      addNewTask();
+    }
+  }
+
+  function loadTasks() {
+    showLoading(true);
+    google.script.run
+      .withSuccessHandler(onTasksLoaded)
+      .withFailureHandler(handleError)
+      .getTasks();
+  }
+
+  function onTasksLoaded(tasks) {
+    showLoading(false);
+    rawTasksData = tasks || [];
+    updateDashboardStats();
+    renderTasks();
+  }
+
+  function updateDashboardStats() {
+    const total = rawTasksData.length;
+    const completed = rawTasksData.filter(t => t.status === 'Completed').length;
+    const pending = total - completed;
+
+    document.getElementById('statTotal').textContent = total;
+    document.getElementById('statCompleted').textContent = completed;
+    document.getElementById('statPending').textContent = pending;
+  }
+
+  function setFilter(filterType, element) {
+    currentFilter = filterType;
+    document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
+    element.classList.add('active');
+    renderTasks();
+  }
+
+  function renderTasks() {
+    const list = document.getElementById('taskList');
+    list.innerHTML = '';
+
+    let filteredTasks = rawTasksData;
+    if (currentFilter === 'pending') {
+      filteredTasks = rawTasksData.filter(t => t.status !== 'Completed');
+    } else if (currentFilter === 'completed') {
+      filteredTasks = rawTasksData.filter(t => t.status === 'Completed');
+    }
+
+    if (filteredTasks.length === 0) {
+      list.innerHTML = `
+        <div class="status-state">
+          <i data-lucide="inbox" style="width: 32px; height: 32px; opacity: 0.5;"></i>
+          <span>Tidak ada tugas ditemukan.</span>
+        </div>`;
+      lucide.createIcons();
+      return;
+    }
+
+    filteredTasks.forEach(t => {
+      const isCompleted = t.status === 'Completed';
+      const li = document.createElement('li');
+      li.className = `task-item ${isCompleted ? 'completed' : ''}`;
+
+      li.innerHTML = `
+        <div class="task-left" onclick="toggleStatus('${t.id}', '${t.status}')">
+          <div class="custom-checkbox">
+            ${isCompleted ? '<i data-lucide="check" style="width: 14px; height: 14px;"></i>' : ''}
+          </div>
+          <span class="task-text">${escapeHtml(t.task)}</span>
+        </div>
+        <button class="btn-delete" title="Hapus Tugas" onclick="removeTask('${t.id}')">
+          <i data-lucide="trash-2" style="width: 18px; height: 18px;"></i>
+        </button>
+      `;
+
+      list.appendChild(li);
+    });
+
+    lucide.createIcons();
+  }
+
+  function addNewTask() {
+    const input = document.getElementById('taskInput');
+    const val = input.value.trim();
+    if (val !== '') {
+      showLoading(true);
+      google.script.run
+        .withSuccessHandler(function() {
+          input.value = '';
+          loadTasks();
+        })
+        .withFailureHandler(handleError)
+        .addTask(val);
+    }
+  }
+
+  function toggleStatus(id, currentStatus) {
+    showLoading(true);
+    google.script.run
+      .withSuccessHandler(loadTasks)
+      .withFailureHandler(handleError)
+      .toggleTaskStatus(id, currentStatus);
+  }
+
+  function removeTask(id) {
+    if (confirm('Yakin ingin menghapus tugas ini?')) {
+      showLoading(true);
+      google.script.run
+        .withSuccessHandler(loadTasks)
+        .withFailureHandler(handleError)
+        .deleteTask(id);
+    }
+  }
+
+  function showLoading(isLoading) {
+    document.getElementById('loading').style.display = isLoading ? 'flex' : 'none';
+    if (isLoading) {
+      document.getElementById('taskList').innerHTML = '';
+      lucide.createIcons();
+    }
+  }
+
+  function handleError(err) {
+    showLoading(false);
+    alert('Terjadi kesalahan: ' + err.message);
+  }
+
+  function escapeHtml(text) {
+    var div = document.createElement('div');
+    div.appendChild(document.createTextNode(text));
+    return div.innerHTML;
+  }
+</script>
+
+</body>
+</html>
