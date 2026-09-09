@@ -13,6 +13,7 @@
   <script src="https://unpkg.com/lucide@latest"></script>
   
   <style>
+    /* Variabel Warna Light Mode (Default) */
     :root {
       --primary: #4F46E5;
       --primary-hover: #4338CA;
@@ -21,10 +22,26 @@
       --text-main: #0F172A;
       --text-muted: #64748B;
       --border: #E2E8F0;
+      --input-bg: #F8FAFC;
+      --task-hover: #CBD5E1;
       --success: #10B981;
       --danger: #EF4444;
       --radius: 12px;
       --shadow: 0 10px 25px -5px rgba(15, 23, 42, 0.05), 0 8px 10px -6px rgba(15, 23, 42, 0.05);
+    }
+
+    /* Variabel Warna Dark Mode */
+    [data-theme="dark"] {
+      --primary: #6366F1;
+      --primary-hover: #4F46E5;
+      --bg-body: #0F172A;
+      --surface: #1E293B;
+      --text-main: #F8FAFC;
+      --text-muted: #94A3B8;
+      --border: #334155;
+      --input-bg: #0F172A;
+      --task-hover: #475569;
+      --shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.3);
     }
 
     * {
@@ -32,6 +49,7 @@
       margin: 0;
       padding: 0;
       font-family: 'Plus Jakarta Sans', sans-serif;
+      transition: background-color 0.25s ease, color 0.25s ease, border-color 0.25s ease;
     }
 
     body {
@@ -51,7 +69,9 @@
     /* Header & Title */
     .app-header {
       margin-bottom: 24px;
-      text-align: left;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
     }
 
     .app-title {
@@ -67,6 +87,47 @@
       font-size: 14px;
       color: var(--text-muted);
       margin-top: 4px;
+    }
+
+    /* User Info Badge */
+    .user-profile-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      background: rgba(79, 70, 229, 0.1);
+      color: var(--primary);
+      padding: 4px 10px;
+      border-radius: 20px;
+      font-size: 12px;
+      font-weight: 600;
+      margin-top: 6px;
+    }
+
+    .header-controls {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    /* Dark Mode Toggle Button */
+    .theme-toggle-btn {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      color: var(--text-main);
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+      flex-shrink: 0;
+    }
+
+    .theme-toggle-btn:hover {
+      border-color: var(--primary);
+      color: var(--primary);
     }
 
     /* Stats Dashboard */
@@ -123,14 +184,13 @@
       border-radius: 8px;
       font-size: 14px;
       outline: none;
-      transition: all 0.2s ease;
-      background: #F8FAFC;
+      background: var(--input-bg);
+      color: var(--text-main);
     }
 
     .task-input:focus {
-      background: #FFFFFF;
       border-color: var(--primary);
-      box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.1);
+      box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.15);
     }
 
     .btn-submit {
@@ -145,7 +205,6 @@
       display: flex;
       align-items: center;
       gap: 8px;
-      transition: background 0.2s;
     }
 
     .btn-submit:hover {
@@ -170,11 +229,10 @@
       color: var(--text-muted);
       border-radius: 6px;
       cursor: pointer;
-      transition: all 0.2s;
     }
 
     .tab-btn.active {
-      background: #EEF2FF;
+      background: rgba(79, 70, 229, 0.12);
       color: var(--primary);
     }
 
@@ -191,19 +249,17 @@
       align-items: center;
       justify-content: space-between;
       padding: 12px 16px;
-      background: #FFFFFF;
+      background: var(--surface);
       border: 1px solid var(--border);
       border-radius: 8px;
-      transition: all 0.2s ease;
     }
 
     .task-item:hover {
-      border-color: #CBD5E1;
+      border-color: var(--task-hover);
     }
 
     .task-item.completed {
-      background: #F8FAFC;
-      opacity: 0.75;
+      opacity: 0.7;
     }
 
     .task-left {
@@ -219,11 +275,10 @@
       width: 20px;
       height: 20px;
       border-radius: 6px;
-      border: 2px solid #CBD5E1;
+      border: 2px solid var(--text-muted);
       display: flex;
       align-items: center;
       justify-content: center;
-      transition: all 0.2s;
       flex-shrink: 0;
     }
 
@@ -237,7 +292,6 @@
       font-size: 14px;
       color: var(--text-main);
       word-break: break-word;
-      transition: color 0.2s;
     }
 
     .task-item.completed .task-text {
@@ -248,19 +302,18 @@
     .btn-delete {
       background: transparent;
       border: none;
-      color: #94A3B8;
+      color: var(--text-muted);
       cursor: pointer;
       padding: 6px;
       border-radius: 6px;
       display: flex;
       align-items: center;
       justify-content: center;
-      transition: all 0.2s;
     }
 
     .btn-delete:hover {
       color: var(--danger);
-      background: #FEF2F2;
+      background: rgba(239, 68, 68, 0.1);
     }
 
     /* Loading & Empty State */
@@ -280,7 +333,7 @@
       body {
         padding: 15px 10px;
       }
-      
+
       .stats-grid {
         grid-template-columns: repeat(3, 1fr);
         gap: 8px;
@@ -316,13 +369,27 @@
 
 <div class="dashboard-container">
   
-  <!-- Header -->
+  <!-- Header dengan Profil Login & Tombol Toggle Mode Malam/Siang -->
   <header class="app-header">
-    <div class="app-title">
-      <i data-lucide="check-square" style="color: var(--primary);"></i>
-      <span>Task Manager</span>
+    <div>
+      <div class="app-title">
+        <i data-lucide="check-square" style="color: var(--primary);"></i>
+        <span>Task Manager</span>
+      </div>
+      <p class="app-subtitle">Kelola tugas harian Anda secara terorganisir dan efisien.</p>
+      <!-- Badge Akun Login -->
+      <div class="user-profile-badge" id="userBadge">
+        <i data-lucide="user" style="width: 12px; height: 12px;"></i>
+        <span id="userEmailText">Memuat akun...</span>
+      </div>
     </div>
-    <p class="app-subtitle">Kelola tugas harian Anda secara terorganisir dan efisien.</p>
+    
+    <div class="header-controls">
+      <!-- Tombol Mode Malam / Siang -->
+      <button class="theme-toggle-btn" id="themeToggleBtn" onclick="toggleTheme()" title="Ganti Mode Tampilan">
+        <i data-lucide="sun" id="themeIcon" style="width: 20px; height: 20px;"></i>
+      </button>
+    </div>
   </header>
 
   <!-- Statistics Cards -->
@@ -362,7 +429,7 @@
 
     <!-- Loading State -->
     <div id="loading" class="status-state">
-      <i data-lucide="loader" class="spin" style="width: 24px; height: 24px; color: var(--primary);"></i>
+      <i data-lucide="loader" style="width: 24px; height: 24px; color: var(--primary);"></i>
       <span>Memuat data dari Spreadsheet...</span>
     </div>
 
@@ -377,9 +444,54 @@
   let currentFilter = 'all';
 
   window.onload = function() {
+    initTheme();
+    loadUserProfile();
     loadTasks();
   };
 
+  /* --- FUNGSI AUTHENTICATION / PROFIL USER --- */
+  function loadUserProfile() {
+    google.script.run
+      .withSuccessHandler(function(profile) {
+        if (profile && profile.email) {
+          document.getElementById('userEmailText').textContent = profile.email;
+        } else {
+          document.getElementById('userEmailText').textContent = 'Guest User';
+        }
+      })
+      .withFailureHandler(function() {
+        document.getElementById('userEmailText').textContent = 'Pengguna Aktif';
+      })
+      .getUserProfile();
+  }
+
+  /* --- FUNGSI MODE MALAM / SIANG --- */
+  function initTheme() {
+    const savedTheme = localStorage.getItem('theme') || 'light';
+    document.documentElement.setAttribute('data-theme', savedTheme);
+    updateThemeIcon(savedTheme);
+  }
+
+  function toggleTheme() {
+    const currentTheme = document.documentElement.getAttribute('data-theme');
+    const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
+    
+    document.documentElement.setAttribute('data-theme', newTheme);
+    localStorage.setItem('theme', newTheme);
+    updateThemeIcon(newTheme);
+  }
+
+  function updateThemeIcon(theme) {
+    const themeIcon = document.getElementById('themeIcon');
+    if (theme === 'dark') {
+      themeIcon.setAttribute('data-lucide', 'moon');
+    } else {
+      themeIcon.setAttribute('data-lucide', 'sun');
+    }
+    lucide.createIcons();
+  }
+
+  /* --- FUNGSI TUGAS & CRUD --- */
   function handleKeyPress(e) {
     if (e.key === 'Enter') {
       addNewTask();
