@@ -4,20 +4,20 @@
 // Jalankan fungsi ini SATU KALI di editor Apps Script
 function setupDatabase() {
   // Membuat Google Sheets baru secara otomatis
-  var ss = SpreadsheetApp.create("Database To-Do List App Multiuser");
+  var ss = SpreadsheetApp.create("Database To-Do List App");
   var sheet = ss.getActiveSheet();
   sheet.setName("Tasks");
   
-  // Membuat Header Tabel Otomatis (Kolom UserEmail)
-  sheet.appendRow(["ID", "Task", "Status", "CreatedAt", "UserEmail"]);
+  // Membuat Header Tabel Otomatis
+  sheet.appendRow(["ID", "Task", "Status", "CreatedAt"]);
   
   // Format Header (Tebalkan teks & beri latar warna)
-  var headerRange = sheet.getRange(1, 1, 1, 5);
+  var headerRange = sheet.getRange(1, 1, 1, 4);
   headerRange.setFontWeight("bold");
   headerRange.setBackground("#4A90E2");
   headerRange.setFontColor("#FFFFFF");
   
-  // Simpan ID Spreadsheet ke Script Properties
+  // Simpan ID Spreadsheet ke Script Properties agar bisa diakses fungsi lain
   PropertiesService.getScriptProperties().setProperty("SPREADSHEET_ID", ss.getId());
   
   Logger.log("✅ Database Spreadsheet berhasil dibuat!");
@@ -33,96 +33,73 @@ function getSheet() {
   return SpreadsheetApp.openById(ssId).getSheetByName("Tasks");
 }
 
-// Helper untuk mendapatkan Email Pengguna Aktif
-function getCurrentUserEmail() {
-  var email = Session.getActiveUser().getEmail();
-  return email || "guest@user.com";
-}
-
 // ==========================================
-// 2. WEB APP ENDPOINT (doGet)
+// 2. WEB APP ENDPOINT (doGet) - PERBAIKAN ERROR
 // ==========================================
 function doGet() {
   var html = HtmlService.createTemplateFromFile('Index').evaluate();
-  html.setTitle('Task Manager - Multiuser');
+  html.setTitle('Nama Website');
   html.addMetaTag('viewport', 'width=device-width, initial-scale=1.0');
-  html.setXFrameOptionsMode(HtmlService.XFrameOptionsMode.ALLOWALL);
+  html.setXFrameOptionsMode(HtmlService.XFrameOptionsMode.ALLOWALL); // Perhatikan kapital huruf 'F' di setXFrameOptionsMode
   return html;
 }
 
 // ==========================================
-// 3. FUNGSI AUTHENTICATION / INFO USER
-// ==========================================
-function getUserProfile() {
-  var email = getCurrentUserEmail();
-  return {
-    email: email,
-    name: email.split('@')[0]
-  };
-}
-
-// ==========================================
-// 4. FUNGSI CRUD DENGAN ISOLASI USER DATA
+// 3. FUNGSI CRUD (Create, Read, Update, Delete)
 // ==========================================
 
-// [READ] Mengambil seluruh data tugas milik user yang sedang login
+// [READ] Mengambil seluruh data tugas
 function getTasks() {
   var sheet = getSheet();
   var data = sheet.getDataRange().getValues();
-  var userEmail = getCurrentUserEmail();
   var tasks = [];
   
   // Lewati baris pertama (header)
   for (var i = 1; i < data.length; i++) {
-    if (data[i][4] && data[i][4].toString() === userEmail) {
-      tasks.push({
-        id: data[i][0],
-        task: data[i][1],
-        status: data[i][2],
-        createdAt: data[i][3]
-      });
-    }
+    tasks.push({
+      id: data[i][0],
+      task: data[i][1],
+      status: data[i][2],
+      createdAt: data[i][3]
+    });
   }
   return tasks;
 }
 
-// [CREATE] Menambahkan tugas baru khusus untuk user login
+// [CREATE] Menambahkan tugas baru
 function addTask(taskText) {
   if (!taskText || taskText.trim() === "") return;
   var sheet = getSheet();
-  var userEmail = getCurrentUserEmail();
-  var id = "TASK_" + new Date().getTime();
+  var id = "TASK_" + new Date().getTime(); // ID unik berdasarkan timestamp
   var createdAt = new Date().toLocaleString("id-ID");
   var status = "Pending";
   
-  sheet.appendRow([id, taskText.trim(), status, createdAt, userEmail]);
+  sheet.appendRow([id, taskText.trim(), status, createdAt]);
   return { id: id, task: taskText.trim(), status: status, createdAt: createdAt };
 }
 
-// [UPDATE] Mengubah status tugas milik user login
+// [UPDATE] Mengubah status tugas (Pending <-> Completed)
 function toggleTaskStatus(id, currentStatus) {
   var sheet = getSheet();
   var data = sheet.getDataRange().getValues();
-  var userEmail = getCurrentUserEmail();
   var newStatus = (currentStatus === "Completed") ? "Pending" : "Completed";
   
   for (var i = 1; i < data.length; i++) {
-    if (data[i][0].toString() === id.toString() && data[i][4] && data[i][4].toString() === userEmail) {
-      sheet.getRange(i + 1, 3).setValue(newStatus);
+    if (data[i][0].toString() === id.toString()) {
+      sheet.getRange(i + 1, 3).setValue(newStatus); // Kolom ke-3 adalah Status
       return newStatus;
     }
   }
   return null;
 }
 
-// [DELETE] Menghapus tugas milik user login
+// [DELETE] Menghapus tugas berdasarkan ID
 function deleteTask(id) {
   var sheet = getSheet();
   var data = sheet.getDataRange().getValues();
-  var userEmail = getCurrentUserEmail();
   
   for (var i = 1; i < data.length; i++) {
-    if (data[i][0].toString() === id.toString() && data[i][4] && data[i][4].toString() === userEmail) {
+    if (data[i][0].toString() === id.toString()) {
       sheet.deleteRow(i + 1);
       return true;
     }
